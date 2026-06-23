@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Interaktif Statistika - SMP</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .tts-btn {
+            background-color: #e67e22;
+            display: flex;
+            margin: 10px auto;
+        }
+        .tts-btn:hover {
+            background-color: #d35400;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .flex-charts {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Penyajian Data Statistika</h1>
+        <button class="tts-btn" onclick="bacaTeks('tujuan-teks')">🔊 Bacakan Tujuan Pembelajaran</button>
+        <div id="tujuan-teks">
+            <p><strong>Tujuan Pembelajaran:</strong></p>
+            <ul>
+                <li>Peserta didik mampu melakukan pengumpulan dan pengolahan data.</li>
+                <li>Peserta didik mampu melakukan penyajian data dalam bentuk tabel, diagram batang, dan diagram lingkaran.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Ayo Berlatih: Data Ekstrakurikuler</h2>
+        <button class="tts-btn" onclick="bacaTeks('instruksi-teks')">🔊 Bacakan Instruksi</button>
+        <p id="instruksi-teks">Silakan ubah angka pada kolom Banyak Siswa di bawah ini untuk melihat bagaimana diagram batang dan diagram lingkaran berubah secara otomatis sesuai dengan data yang kamu masukkan.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Kegiatan Ekstrakurikuler</th>
+                    <th>Banyak Siswa</th>
+                </tr>
+            </thead>
+            <tbody id="data-table">
+                <tr>
+                    <td>Tenis Meja</td>
+                    <td><input type="number" id="tenis" value="6" min="0" onchange="updateCharts()"></td>
+                </tr>
+                <tr>
+                    <td>Senam</td>
+                    <td><input type="number" id="senam" value="18" min="0" onchange="updateCharts()"></td>
+                </tr>
+                <tr>
+                    <td>Basket</td>
+                    <td><input type="number" id="basket" value="12" min="0" onchange="updateCharts()"></td>
+                </tr>
+                <tr>
+                    <td>Lari</td>
+                    <td><input type="number" id="lari" value="4" min="0" onchange="updateCharts()"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card flex-charts">
+        <div class="chart-container">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Fitur Text-to-Speech (TTS)
+        function bacaTeks(elementId) {
+            const textToRead = document.getElementById(elementId).innerText;
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(textToRead);
+                speech.lang = 'id-ID'; // Bahasa Indonesia
+                speech.rate = 0.9; // Kecepatan membaca
+                speech.pitch = 1;
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert("Maaf, browser kamu tidak mendukung fitur Text-to-Speech.");
+            }
+        }
+
+        // Inisialisasi Chart.js
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+        const labels = ['Tenis Meja', 'Senam', 'Basket', 'Lari'];
+        const colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71'];
+
+        let barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Banyak Siswa',
+                    data: [6, 18, 12, 4],
+                    backgroundColor: colors
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        let pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: [6, 18, 12, 4],
+                    backgroundColor: colors
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        // Fungsi untuk memperbarui grafik saat input diubah
+        function updateCharts() {
+            const dataTenis = parseInt(document.getElementById('tenis').value) || 0;
+            const dataSenam = parseInt(document.getElementById('senam').value) || 0;
+            const dataBasket = parseInt(document.getElementById('basket').value) || 0;
+            const dataLari = parseInt(document.getElementById('lari').value) || 0;
+
+            const newData = [dataTenis, dataSenam, dataBasket, dataLari];
+
+            // Update data diagram batang
+            barChart.data.datasets[0].data = newData;
+            barChart.update();
+
+            // Update data diagram lingkaran
+            pieChart.data.datasets[0].data = newData;
+            pieChart.update();
+        }
+    </script>
+</body>
+</html>
